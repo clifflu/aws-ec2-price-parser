@@ -1,0 +1,31 @@
+{
+    "prefix" : "http://aws.amazon.com/ec2/pricing/json/",
+    "appendix" : ".json",
+
+    "files" : [
+        "linux-od",
+        "linux-ri-light",
+        "linux-ri-medium",
+        "linux-ri-heavy",
+        "mswin-od",
+        "mswin-ri-light",
+        "mswin-ri-medium",
+        "mswin-ri-heavy",
+        "mswinSQL-od",
+        "mswinSQL-ri-light",
+        "mswinSQL-ri-medium",
+        "mswinSQL-ri-heavy",
+        "mswinSQLWeb-od",
+        "mswinSQLWeb-ri-light",
+        "mswinSQLWeb-ri-medium",
+        "mswinSQLWeb-ri-heavy",
+        "rhel-od",
+        "rhel-ri-light",
+        "rhel-ri-medium",
+        "rhel-ri-heavy",
+        "sles-od",
+        "sles-ri-light",
+        "sles-ri-medium",
+        "sles-ri-heavy"
+    ]
+}

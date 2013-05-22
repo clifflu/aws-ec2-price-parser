@@ -1,0 +1,54 @@
+{
+    "currencies": [
+        "USD"
+    ],
+    "regions": {
+        "us-east":          "US East (N. Virginia)",
+        "us-west":          "US West (Northern California)",
+        "us-west-2":        "US West (Oregon)",
+        "eu-west":          "EU (Ireland)",
+        "apac-sin":         "Asia Pacific (Singapore)",
+        "apac-tokyo":       "Asia Pacific (Tokyo)",
+        "apac-syd":         "Asia Pacific (Sydney)",
+        "sa-east":          "South America (Sao Paulo)"
+    },
+    "oses": {
+        "linux": "Linux/UNIX Usage",
+        "mswin": "Windows",
+        "mswinSQL": "Windows with SQL",
+        "mswinSQLWeb": "Windows with SQL Web",
+        "rhel": "Red Hat Enterprise",
+        "sles": "SUSE"
+    },
+    "instances": {
+        "u": "Micro",
+        "std":  "Standard",
+        "std2": "Second Generation Standard",
+        "hiIO": "High-I/O",
+        "hiStore": "High-Storage",
+        "hiMem": "High-Memory",
+        "hiCPU": "High-CPU",
+        "cc": "Cluster Compute",
+        "cHiMem": "High-Memory Cluster",
+        "cGPU": "Cluster GPU"
+    },
+    "sizes": {
+        "u":            "Micro",
+        "sm":           "Small",
+        "med":          "Medium",
+        "lg":           "Large",
+        "xl":           "Extra Large",
+        "xxl":          "Double Extra Large",
+        "xxxxl":        "Quadruple Extra Large",
+        "xxxxxxxxl":    "Eight Extra Large"
+    },
+    "terms": {
+        "od":  "On Demand",
+        "y1l":  "1 yr Term, Light Utilization",
+        "y1m":  "1 yr Term, Medium Utilization",
+        "y1h":  "1 yr Term, High Utilization",
+        "y3l":  "3 yr Term, Light Utilization",
+        "y3m":  "3 yr Term, Medium Utilization",
+        "y3h":  "3 yr Term, High Utilization"
+    }
+}
