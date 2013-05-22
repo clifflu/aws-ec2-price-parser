@@ -1,7 +1,7 @@
-aws-ec2-price-parser
+aws-ec2-price-tool
 =============================
 
-aws-ec2-price-parser is deisgned to provide an alternative method to play with AWS EC2 pricings.
+aws-ec2-price-tool is deisgned to provide an alternative method to play with AWS EC2 pricing data.
 It is composed of three parts:
 * src/fetch.py : command-line utility to fetch .json files from AWS, re-parse them, and output in a much more compact format (2.54MB -> 96 KB). 
 * src/aws-ec2-price.js : 
