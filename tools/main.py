@@ -13,9 +13,7 @@
 import os
 import json
 import sys
-import urllib
 import re
-import ast
 import exceptions
 
 def build_lookup_table(src, dest):
@@ -29,13 +27,32 @@ def aws_url(fn):
 def local_fn(fn):
     return os.path.join(PATH['TMP'], fn + CONFIG['fetch']['appendix'])
 
+def need_fetch():
+    import time, datetime
+
+    past = datetime.datetime.now() - datetime.timedelta(days=CONFIG['config']['refetch_days'])
+    past = time.mktime(past.timetuple())
+
+    if CONFIG['config']['force_fetch']:
+        return True
+    
+    for fn in CONFIG['fetch']['files']:
+        fn = local_fn(fn)
+        
+        if not os.path.isfile(fn):
+            return True
+
+        if (os.path.getmtime(fn) < past):
+            return True
+
+    return False
+
+
 def fetch():
     """Fetch data files from AWS"""
-    fetch_list = CONFIG['fetch']['files']
+    import urllib
 
-    for fn in fetch_list:
-        # print('fetching "%s"' % fn)
-        # sys.stdout.flush()
+    for fn in CONFIG['fetch']['files']:
         urllib.urlretrieve(aws_url(fn), local_fn(fn))
 
 def guess_os(fn):
@@ -45,6 +62,7 @@ def guess_os(fn):
     return False
 
 def num(str):
+    import ast
     try:
         return ast.literal_eval(str)
     except exceptions.StandardError:
@@ -74,11 +92,6 @@ def parse_od(src_sz, tbl_sz):
 
 def parse_ri(src_sz, c_term, tbl_sz):
     src_vcs = src_sz['valueColumns']
-
-    upfront_1 = None
-    upfront_3 = None
-    hourly_1 = None
-    hourly_3 = None
 
     for vc in src_vcs :
         if vc['name'] == 'yrTerm1':
@@ -151,9 +164,7 @@ def parse_file(fn, tbl):
 
 def strip_null_worker(obj):
     fired = 0
-    sub = None
     tbd = []
-    i = 0
 
     if type(obj) is list:
         for i in range(len(obj)-1):
@@ -211,8 +222,9 @@ def convert():
 def usage():
     print("usage: %s [options]" % sys.argv[0])
     print("Options and arguments:")
+    print("-c\t\t: cleanup tmp files after completion")
     print("-d days\t\t: days before automatic refetch, default=7")
-    print("-f \t\t: force refetch, ignore file age check")
+    print("-f \t\t: force fetch, ignore file age check")
     print("-h\t\t: print this help message")
     print("-i width\t: set indentation, implies pretty output (-p)")
     print("-o file\t\t: output to file, not than stdout")
@@ -231,35 +243,13 @@ PATH['CONFIG']  = os.path.join(PATH['ROOT'], 'config')
 PATH['TMP']     = os.path.join(PATH['ROOT'], 'tmp')
 
 #
-# Command-line options
-#
-
-ARGS = {'fetch': False, 'convert': True, 'pretty': False, 'indent': 4}
-
-for arg in sys.argv:
-    if (arg in ('-h', '--help')):        
-        usage()
-        continue
-
-    if (arg in ('-t', '--tmp-dir')):
-        pass
-
-    # not found, probably param to other directives
-    idx = sys.argv.index(arg)
-    if idx > 1 and sys.argv.index(idx-1) in ('-d', '--days', '-i', '--indent', '-o', '--output-file', '-t', '--tmp-dir'):
-        continue
-
-    usage()
-
-#
 # Load Config Files
 #
 
-CONFIG = {'fetch': None, 'remap': None, 'tags': None}
+CONFIG = {'config': None, 'fetch': None, 'remap': None, 'tags': None}
 
 for fn in CONFIG:
     with open(os.path.join(PATH['CONFIG'], fn + '.json'), 'r') as fp:
-        # print('Loading Config "%s"' % fn)
         CONFIG[fn] = json.load(fp)
 
 #
@@ -271,11 +261,76 @@ for tbl_name in CONFIG['remap']['_lookup']:
     build_lookup_table(CONFIG['remap']['_lookup'][tbl_name], CONFIG['remap'][tbl_name])
 
 #
+# Command-line options
+#
+
+try:
+    for arg in sys.argv:
+        idx = sys.argv.index(arg)
+
+        if (arg in ('-c', '--cleanup')):
+            CONFIG['config']['cleanup'] = True
+            continue
+        elif (arg in ('-d', '--days')):
+            CONFIG['config']['refetch_days'] = num(sys.argv[idx+1])
+            continue
+        elif (arg in ('-f', '--force-fetch')):
+            CONFIG['config']['force_fetch'] = True
+            continue
+        elif (arg in ('-h', '--help')):
+            usage()
+            continue
+        elif (arg in ('-i', '--indent')):
+            CONFIG['config']['output_indent'] = num(sys.argv[idx+1])
+            CONFIG['config']['pretty_output'] = True
+            continue
+        elif (arg in ('-o', '--output-file')):
+            CONFIG['config']['output_fn'] = sys.argv[idx+1]
+            continue
+        elif (arg in ('-p', '--pretty-output')):
+            CONFIG['config']['pretty_output'] = True
+            continue
+        elif (arg in ('-t', '--tmp-dir')):
+            PATH['TMP'] = sys.argv[idx+1]
+            continue
+
+        # not found, probably param to other directives
+        if idx > 1 and sys.argv[idx-1] in ('-d', '--days', '-i', '--indent', '-o', '--output-file', '-t', '--tmp-dir'):
+            continue
+
+        # script itself
+        if idx == 0: 
+            continue
+
+        print('Unknown args: %d => %s' % (idx, arg))
+        usage()
+
+except exceptions.StandardError:
+    print('Exception: %d => %s' % (idx, arg))
+    usage()
+
+#
 # Main
 #
 
-if (DO['fetch']):
+if (need_fetch()):
     fetch()
 
-if (DO['convert']):
-    print(json.dumps(convert()))
+output = convert()
+
+if CONFIG['config']['pretty_output']:
+    output = json.dumps(output, indent=CONFIG['config']['output_indent'])
+else:
+    output = json.dumps(output)
+
+if CONFIG['config']['output_fn']:
+    with open(CONFIG['config']['output_fn'], "w") as fp:
+        fp.write(output + "\n")
+else:
+    print(output)
+
+if CONFIG['config']['cleanup']:
+    for fn in CONFIG['fetch']['files']:
+        fn = local_fn(fn)
+        if os.path.isfile(fn):
+            os.unlink(fn)
