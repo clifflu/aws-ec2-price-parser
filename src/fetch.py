@@ -21,10 +21,10 @@ import exceptions
 #
 
 def aws_url(fn):
-    return CONFIG['fetch']['prefix'] + fn + CONFIG['fetch']['appendix']
+    return CONFIG['filelist']['prefix'] + fn + CONFIG['filelist']['appendix']
 
 def local_fn(fn):
-    return os.path.join(PATH['TMP'], fn + CONFIG['fetch']['appendix'])
+    return os.path.join(PATH['TMP'], fn + CONFIG['filelist']['appendix'])
 
 def build_lookup_table(src, dest):
     for key in src:
@@ -202,26 +202,26 @@ def proc_args():
             idx = sys.argv.index(arg)
 
             if (arg in ('-c', '--cleanup')):
-                CONFIG['config']['cleanup'] = True
+                CONFIG['cmdline']['cleanup'] = True
                 continue
             elif (arg in ('-d', '--days')):
-                CONFIG['config']['refetch_days'] = num(sys.argv[idx+1])
+                CONFIG['cmdline']['refetch_days'] = num(sys.argv[idx+1])
                 continue
             elif (arg in ('-f', '--force-fetch')):
-                CONFIG['config']['force_fetch'] = True
+                CONFIG['cmdline']['force_fetch'] = True
                 continue
             elif (arg in ('-h', '--help')):
                 usage()
                 continue
             elif (arg in ('-i', '--indent')):
-                CONFIG['config']['output_indent'] = num(sys.argv[idx+1])
-                CONFIG['config']['pretty_output'] = True
+                CONFIG['cmdline']['output_indent'] = num(sys.argv[idx+1])
+                CONFIG['cmdline']['pretty_output'] = True
                 continue
             elif (arg in ('-o', '--output-file')):
-                CONFIG['config']['output_fn'] = sys.argv[idx+1]
+                CONFIG['cmdline']['output_fn'] = sys.argv[idx+1]
                 continue
             elif (arg in ('-p', '--pretty-output')):
-                CONFIG['config']['pretty_output'] = True
+                CONFIG['cmdline']['pretty_output'] = True
                 continue
             elif (arg in ('-t', '--tmp-dir')):
                 PATH['TMP'] = sys.argv[idx+1]
@@ -243,13 +243,13 @@ def proc_args():
 def need_fetch():
     import time, datetime
 
-    past = datetime.datetime.now() - datetime.timedelta(days=CONFIG['config']['refetch_days'])
+    past = datetime.datetime.now() - datetime.timedelta(days=CONFIG['cmdline']['refetch_days'])
     past = time.mktime(past.timetuple())
 
-    if CONFIG['config']['force_fetch']:
+    if CONFIG['cmdline']['force_fetch']:
         return True
     
-    for fn in CONFIG['fetch']['files']:
+    for fn in CONFIG['filelist']['files']:
         fn = local_fn(fn)
         
         if not os.path.isfile(fn):
@@ -264,33 +264,33 @@ def fetch():
     """Fetch data files from AWS"""
     import urllib
 
-    for fn in CONFIG['fetch']['files']:
+    for fn in CONFIG['filelist']['files']:
         urllib.urlretrieve(aws_url(fn), local_fn(fn))
 
 def convert():
     """Convert downloaded files"""
     output = {}
-    fetch_list = CONFIG['fetch']['files']
+    fetch_list = CONFIG['filelist']['files']
     for fn in fetch_list:
         parse_file(fn, output)
 
     return strip_nulls(output)
 
 def output(str):
-    if CONFIG['config']['pretty_output']:
-        str = json.dumps(str, indent=CONFIG['config']['output_indent'])
+    if CONFIG['cmdline']['pretty_output']:
+        str = json.dumps(str, indent=CONFIG['cmdline']['output_indent'])
     else:
         str = json.dumps(str)
 
-    if CONFIG['config']['output_fn']:
-        with open(CONFIG['config']['output_fn'], "w") as fp:
+    if CONFIG['cmdline']['output_fn']:
+        with open(CONFIG['cmdline']['output_fn'], "w") as fp:
             fp.write(str + "\n")
     else:
         print(str)
 
 def cleanup():
-    if CONFIG['config']['cleanup']:
-        for fn in CONFIG['fetch']['files']:
+    if CONFIG['cmdline']['cleanup']:
+        for fn in CONFIG['filelist']['files']:
             fn = local_fn(fn)
             if os.path.isfile(fn):
                 os.unlink(fn)
@@ -324,7 +324,7 @@ PATH['TMP']     = os.path.join(PATH['ROOT'], 'tmp')
 # Load Config Files
 #
 
-CONFIG = {'config': None, 'fetch': None, 'remap': None, 'tags': None}
+CONFIG = {'cmdline': None, 'filelist': None, 'remap': None, 'tags': None}
 
 for fn in CONFIG:
     with open(os.path.join(PATH['CONFIG'], fn + '.json'), 'r') as fp:
@@ -344,10 +344,6 @@ for tbl_name in CONFIG['remap']['_lookup']:
 
 if __name__ == '__main__':
     proc_args();
-
-    if (need_fetch()):
-        fetch()
-
+    if need_fetch(): fetch()
     output(convert())
-
     cleanup()
