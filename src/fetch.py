@@ -309,7 +309,7 @@ def output(str):
     if ARGS.indent:
         str = json.dumps(str, indent=ARGS.indent)
     else:
-        str = json.dumps(str)
+        str = json.dumps(str,  separators=(',', ':'))
 
     if ARGS.output:
         with open(ARGS.output, "w") as fp:
