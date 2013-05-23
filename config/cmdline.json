@@ -1,8 +1,0 @@
-{
-    "cleanup": false,
-    "force_fetch": false, 
-    "output_fn": false,
-    "output_indent": 4,
-    "pretty_output": false, 
-    "refetch_days": 7
-}

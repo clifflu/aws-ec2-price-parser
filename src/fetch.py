@@ -14,11 +14,15 @@ import os
 import json
 import sys
 import re
-import exceptions
 
 #
 # Util
 #
+
+def lookup_dict(key, tbl):
+    if key in tbl.keys():
+        return tbl[key]
+    return key
 
 def aws_url(fn):
     return CONFIG['filelist']['prefix'] + fn + CONFIG['filelist']['appendix']
@@ -33,9 +37,10 @@ def build_lookup_table(src, dest):
 
 def num(str):
     import ast
+
     try:
         return ast.literal_eval(str)
-    except exceptions.StandardError:
+    except Exception:
         return None
 
 def guess_os(fn):
@@ -81,12 +86,9 @@ def parse_file(fn, tbl):
         # todo: Currency and Version check
 
         for src_regional in src['config']['regions']:
-            c_region = src_regional['region']
-
-            if c_region in CONFIG['remap']['regions']:
-                c_region = CONFIG['remap']['regions'][c_region]
+            c_region = lookup_dict(src_regional['region'], CONFIG['remap']['regions'])
             
-            # todo: region check
+            # todo: check region
 
             if not c_region in tbl.keys():
                 tbl[c_region] = {}
@@ -98,16 +100,12 @@ def parse_file(fn, tbl):
 
 def parse_instance_type(src_its, c_term, tbl_its ):
     for src_it in src_its:
-        c_type = src_it['type']
-
-        if c_type in CONFIG['remap']['instances']:
-            c_type = CONFIG['remap']['instances'][c_type]
-
+        c_type = lookup_dict(src_it['type'], CONFIG['remap']['instances'])
         if c_type not in tbl_its.keys():
             tbl_its[c_type] = {}
 
         for src_sz in src_it['sizes']:
-            c_size = src_sz['size']
+            c_size = lookup_dict(src_sz['size'], CONFIG['remap']['sizes'])
 
             if c_size not in tbl_its[c_type].keys():
                 tbl_its[c_type][c_size] = {}
@@ -195,59 +193,35 @@ def strip_null_worker(obj):
 #
 # Procedural
 #
-
 def proc_args():
-    try:
-        for arg in sys.argv:
-            idx = sys.argv.index(arg)
+    from argparse import ArgumentParser
 
-            if (arg in ('-c', '--cleanup')):
-                CONFIG['cmdline']['cleanup'] = True
-                continue
-            elif (arg in ('-d', '--days')):
-                CONFIG['cmdline']['refetch_days'] = num(sys.argv[idx+1])
-                continue
-            elif (arg in ('-f', '--force-fetch')):
-                CONFIG['cmdline']['force_fetch'] = True
-                continue
-            elif (arg in ('-h', '--help')):
-                usage()
-                continue
-            elif (arg in ('-i', '--indent')):
-                CONFIG['cmdline']['output_indent'] = num(sys.argv[idx+1])
-                CONFIG['cmdline']['pretty_output'] = True
-                continue
-            elif (arg in ('-o', '--output-file')):
-                CONFIG['cmdline']['output_fn'] = sys.argv[idx+1]
-                continue
-            elif (arg in ('-p', '--pretty-output')):
-                CONFIG['cmdline']['pretty_output'] = True
-                continue
-            elif (arg in ('-t', '--tmp-dir')):
-                PATH['TMP'] = sys.argv[idx+1]
-                continue
+    tbl = CONFIG['lang']['help']
 
-            # not found, probably param to other directives
-            if idx > 1 and sys.argv[idx-1] in ('-d', '--days', '-i', '--indent', '-o', '--output-file', '-t', '--tmp-dir'):
-                continue
+    parser = ArgumentParser(add_help=True, description=tbl['app'])
+    
+    parser.add_argument('--cleanup', '-c', help=tbl['cleanup'], action='store_const', const=True, default=False)
+    parser.add_argument('--days-expire', '-d', help=tbl['days-expire'], default=7, type=int, metavar='DAYS')
+    parser.add_argument('--force-fetch', '-f', help=tbl['force-fetch'], action="store_const", const=True, default=False)
+    parser.add_argument('--indent', '-i', help=tbl['indent'], default=0, type=int, metavar='WIDTH')
+    parser.add_argument('--output', '-o', help=tbl['output'], metavar='FILE')
+    parser.add_argument('--pretty', '-p', help=tbl['pretty'], action='store_const', default=False, const=True)
+    parser.add_argument('--tmp-dir', '-t', help=tbl['tmp-dir'], metavar='PATH')
 
-            # script itself
-            if idx == 0: 
-                continue
+    ARGS = parser.parse_args()
+    if (ARGS.tmp_dir and os.path.isdir(ARGS.tmp_dir)):
+        PATH['tmp'] = ARGS.tmp_dir
 
-            usage()
-
-    except exceptions.StandardError:
-        usage()
+    return ARGS
 
 def need_fetch():
+    if ARGS.force_fetch:
+        return True
+
     import time, datetime
 
-    past = datetime.datetime.now() - datetime.timedelta(days=CONFIG['cmdline']['refetch_days'])
+    past = datetime.datetime.now() - datetime.timedelta(days=ARGS.days_expire)
     past = time.mktime(past.timetuple())
-
-    if CONFIG['cmdline']['force_fetch']:
-        return True
     
     for fn in CONFIG['filelist']['files']:
         fn = local_fn(fn)
@@ -262,8 +236,10 @@ def need_fetch():
 
 def fetch():
     """Fetch data files from AWS"""
-    import urllib
+    if not need_fetch():
+        return
 
+    import urllib
     for fn in CONFIG['filelist']['files']:
         urllib.urlretrieve(aws_url(fn), local_fn(fn))
 
@@ -277,38 +253,28 @@ def convert():
     return strip_nulls(output)
 
 def output(str):
-    if CONFIG['cmdline']['pretty_output']:
-        str = json.dumps(str, indent=CONFIG['cmdline']['output_indent'])
+    if ARGS.pretty and ARGS.indent == 0:
+        ARGS.indent = 4
+
+    if ARGS.indent:
+        str = json.dumps(str, indent=ARGS.indent)
     else:
         str = json.dumps(str)
 
-    if CONFIG['cmdline']['output_fn']:
-        with open(CONFIG['cmdline']['output_fn'], "w") as fp:
+    if ARGS.output:
+        with open(ARGS.output, "w") as fp:
             fp.write(str + "\n")
     else:
         print(str)
 
 def cleanup():
-    if CONFIG['cmdline']['cleanup']:
-        for fn in CONFIG['filelist']['files']:
-            fn = local_fn(fn)
-            if os.path.isfile(fn):
-                os.unlink(fn)
+    if not ARGS.cleanup:
+        return
 
-def usage():
-    print("usage: %s [options]" % sys.argv[0])
-    print("Options and arguments:")
-    print("-c\t\t: cleanup tmp files after completion")
-    print("-d days\t\t: days before automatic refetch, default=7")
-    print("-f \t\t: force fetch, ignore file age check")
-    print("-h\t\t: print this help message")
-    print("-i width\t: set indentation, implies pretty output (-p)")
-    print("-o file\t\t: output to file, not than stdout")
-    print("-p \t\t: pretty output, file gets larger")
-    print("-t dir\t\t: override tmp path")
-    sys.exit(0)
-
-
+    for fn in CONFIG['filelist']['files']:
+        fn = local_fn(fn)
+        if os.path.isfile(fn):
+            os.unlink(fn)
 
 #
 # Project Paths
@@ -324,7 +290,7 @@ PATH['TMP']     = os.path.join(PATH['ROOT'], 'tmp')
 # Load Config Files
 #
 
-CONFIG = {'cmdline': None, 'filelist': None, 'remap': None, 'tags': None}
+CONFIG = {'filelist': None, 'lang': None, 'remap': None, 'tags': None}
 
 for fn in CONFIG:
     with open(os.path.join(PATH['CONFIG'], fn + '.json'), 'r') as fp:
@@ -343,7 +309,7 @@ for tbl_name in CONFIG['remap']['_lookup']:
 #
 
 if __name__ == '__main__':
-    proc_args();
-    if need_fetch(): fetch()
+    ARGS = proc_args()
+    fetch()
     output(convert())
     cleanup()

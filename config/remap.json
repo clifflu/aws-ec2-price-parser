@@ -1,25 +1,36 @@
 {
     "_lookup": {
         "instances": {
-            "std": ["stdODI", "stdResI"],
-            "std2": ["secgenstdODI", "secgenstdResI"],
-            "u": ["uODI", "uResI"],
-            "hiMem": ["hiMemODI", "hiMemResI"],
-            "hiCPU": ["hiCPUODI", "hiCPUResI"],
-            "cc": ["clusterComputeI", "clusterCompResI"],
-            "cHiMem": ["clusterHiMemODI", "clusterHiMemResI"],
-            "cGPU": ["clusterGPUI", "clusterGPUResI"],
-            "hiIO": ["hiIoODI", "hiIoResI"],
-            "hiStore": ["hiStoreODI", "hiStoreResI"]
+            "m1": ["stdODI", "stdResI"],
+            "m3": ["secgenstdODI", "secgenstdResI"],
+            "t1": ["uODI", "uResI"],
+            "m2": ["hiMemODI", "hiMemResI"],
+            "c1": ["hiCPUODI", "hiCPUResI"],
+            "cc1": ["clusterComputeI", "clusterCompResI"],
+            "cr1": ["clusterHiMemODI", "clusterHiMemResI"],
+            "cc2": ["clusterGPUI", "clusterGPUResI"],
+            "hi1": ["hiIoODI", "hiIoResI"],
+            "hs1": ["hiStoreODI", "hiStoreResI"]
         }
     },
     "regions": {
-        "us-west-1":        "us-west",
-        "eu-west-1":        "eu-west",
-        "eu-ireland":       "eu-west",
-        "ap-southeast-1":   "apac-sin",
-        "ap-northeast-1":   "apac-tokyo",
-        "ap-southeast-2":   "apac-syd",
-        "sa-east-1":        "sa-east"
+        "us-east":      "us-east-1",
+        "us-west":      "us-west-1",
+        "sa-east":      "sa-east-1",
+        "eu-west":      "eu-west-1",
+        "eu-ireland":   "eu-west-1",
+        "apac-sin":     "ap-southeast-1",
+        "apac-tokyo":   "ap-northeast-1",
+        "apac-syd":     "ap-southeast-2"
+    },
+    "sizes": {
+        "u":            "micro",
+        "sm":           "small",
+        "med":          "medium",
+        "lg":           "large",
+        "xl":           "xlarge",
+        "xxl":          "2xlarge",
+        "xxxxl":        "4xlarge",
+        "xxxxxxxxl":    "8xlarge"
     }
 }

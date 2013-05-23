@@ -1,16 +1,13 @@
 {
-    "currencies": [
-        "USD"
-    ],
     "regions": {
-        "us-east":          "US East (N. Virginia)",
-        "us-west":          "US West (Northern California)",
+        "us-east-1":        "US East (N. Virginia)",
+        "us-west-1":        "US West (Northern California)",
         "us-west-2":        "US West (Oregon)",
-        "eu-west":          "EU (Ireland)",
-        "apac-sin":         "Asia Pacific (Singapore)",
-        "apac-tokyo":       "Asia Pacific (Tokyo)",
-        "apac-syd":         "Asia Pacific (Sydney)",
-        "sa-east":          "South America (Sao Paulo)"
+        "sa-east-1":        "South America (Sao Paulo)",
+        "eu-west-1":        "EU (Ireland)",
+        "ap-southeast-1":   "Asia Pacific (Singapore)",
+        "ap-northeast-1":   "Asia Pacific (Tokyo)",
+        "ap-southeast-2":   "Asia Pacific (Sydney)"
     },
     "oses": {
         "linux": "Linux/UNIX Usage",
@@ -33,14 +30,14 @@
         "cGPU": "Cluster GPU"
     },
     "sizes": {
-        "u":            "Micro",
-        "sm":           "Small",
-        "med":          "Medium",
-        "lg":           "Large",
-        "xl":           "Extra Large",
-        "xxl":          "Double Extra Large",
-        "xxxxl":        "Quadruple Extra Large",
-        "xxxxxxxxl":    "Eight Extra Large"
+        "micro":    "Micro",
+        "small":    "Small",
+        "medium":   "Medium",
+        "large":    "Large",
+        "xlarge":   "Extra Large",
+        "2xlarge":  "Double Extra Large",
+        "4xlarge":  "Quadruple Extra Large",
+        "8xlarge":  "Eight Extra Large"
     },
     "terms": {
         "od":  "On Demand",

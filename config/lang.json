@@ -1,0 +1,12 @@
+{
+    "help": {
+        "app":          "fetch pricing data files from AWS and re-parse them",
+        "cleanup":      "cleanup tmp files upon completion",
+        "days-expire":  "days before fetch files expire, default = 7",
+        "force-fetch":  "force fetch, ignores file expire check",
+        "indent":       "sets output indentation, implies pretty output (-p)",
+        "output":       "output to file, not stdout",
+        "pretty":       "pretty output, file gets larger",
+        "tmp-dir":      "override tmp path"
+    }
+}
