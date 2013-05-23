@@ -18,16 +18,16 @@
         "sles": "SUSE"
     },
     "instances": {
-        "u": "Micro",
-        "std":  "Standard",
-        "std2": "Second Generation Standard",
-        "hiIO": "High-I/O",
-        "hiStore": "High-Storage",
-        "hiMem": "High-Memory",
-        "hiCPU": "High-CPU",
-        "cc": "Cluster Compute",
-        "cHiMem": "High-Memory Cluster",
-        "cGPU": "Cluster GPU"
+        "t1": "Micro",
+        "m1":  "Standard",
+        "m3": "Second Generation Standard",
+        "hi1": "High-I/O",
+        "hs1": "High-Storage",
+        "m2": "High-Memory",
+        "c1": "High-CPU",
+        "cc1": "Cluster Compute",
+        "cr1": "Cluster High-Memory",
+        "cc2": "Cluster GPU"
     },
     "sizes": {
         "micro":    "Micro",
