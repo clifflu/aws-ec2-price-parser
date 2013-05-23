@@ -117,7 +117,7 @@ def fix_instance_size(c_instance, c_size):
     for typo in CONFIG['remap']['instance_size']:
         if typo['replace']['instance'] == c_instance and typo['replace']['size'] == c_size:
             return (typo['with']['instance'], typo['with']['size'])
-            
+
     return (c_instance, c_size)
 
 def parse_instance_type(src_its, c_term, tbl_its ):
@@ -167,14 +167,14 @@ def parse_ri(src_sz, c_term, tbl_sz):
 #
 # Remove None (null) and N/A
 #
-def strip_nulls(obj):
+def truncate_nulls(obj):
     """除去 obj 及其子成員中，只包含 None 的 list, 以及不包含任何成員的 list 或 dict"""
-    while strip_null_worker(obj) > 0:
+    while truncate_null_worker(obj) > 0:
         pass
 
     return obj
 
-def strip_null_worker(obj):
+def truncate_null_worker(obj):
     fired = 0
     tbd = []
 
@@ -191,7 +191,7 @@ def strip_null_worker(obj):
                     tbd.append(i)
                     fired = 1
                 else:
-                    fired = strip_null_worker(sub) or fired
+                    fired = truncate_null_worker(sub) or fired
 
         for i in sorted(tbd, reverse=True):
             del(obj[i])
@@ -209,11 +209,35 @@ def strip_null_worker(obj):
                     tbd.append(i)
                     fired = 1
                 else:
-                    fired = strip_null_worker(sub) or fired
+                    fired = truncate_null_worker(sub) or fired
         for i in tbd:
             del(obj[i])
 
     return fired
+
+def truncate_depth(obj):
+    if ARGS.max_depth > 0:
+        truncate_depth_worker(obj, ARGS.max_depth)
+    
+    return obj
+
+def truncate_depth_worker(obj, max_depth):
+    if (max_depth == 0):
+        # kaboom, obj is the last node
+        if type(obj) is list:
+            del (obj[:])
+        elif type(obj) is dict:
+            obj.clear()
+        return
+
+    max_depth = max_depth -1
+
+    if type(obj) is list:
+        for i in obj:
+            truncate_depth_worker(i, max_depth)
+    elif type(obj) is dict:
+        for i in obj:
+            truncate_depth_worker(obj[i], max_depth)
 
 #
 # Procedural
@@ -226,9 +250,10 @@ def proc_args():
     parser = ArgumentParser(add_help=True, description=tbl['app'])
     
     parser.add_argument('--cleanup', '-c', help=tbl['cleanup'], action='store_const', const=True, default=False)
-    parser.add_argument('--days-expire', '-d', help=tbl['days-expire'], default=7, type=int, metavar='DAYS')
+    parser.add_argument('--days-expire', '-e', help=tbl['days-expire'], default=7, type=int, metavar='DAYS')
     parser.add_argument('--force-fetch', '-f', help=tbl['force-fetch'], action="store_const", const=True, default=False)
     parser.add_argument('--indent', '-i', help=tbl['indent'], default=0, type=int, metavar='WIDTH')
+    parser.add_argument('--max-depth', '-d', help=tbl['max-depth'], default=0, type=int, metavar='DEPTH')
     parser.add_argument('--output', '-o', help=tbl['output'], metavar='FILE')
     parser.add_argument('--pretty', '-p', help=tbl['pretty'], action='store_const', default=False, const=True)
     parser.add_argument('--tmp-dir', '-t', help=tbl['tmp-dir'], metavar='PATH')
@@ -275,7 +300,7 @@ def convert():
     for fn in fetch_list:
         parse_file(fn, output)
 
-    return strip_nulls(output)
+    return truncate_depth(truncate_nulls(output))
 
 def output(str):
     if ARGS.pretty and ARGS.indent == 0:

@@ -5,6 +5,7 @@
         "days-expire":  "days before fetch files expire, default = 7",
         "force-fetch":  "force fetch, ignores file expire check",
         "indent":       "sets output indentation, implies pretty output (-p)",
+        "max-depth":    "sets max depth in output. 0 = complete list",
         "output":       "output to file, not stdout",
         "pretty":       "pretty output, file gets larger",
         "tmp-dir":      "override tmp path"
