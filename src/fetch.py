@@ -6,6 +6,14 @@
 #   License: MIT License
 #
 
+# 
+# Resources:
+#   AWS EC2 instance types:
+#       - http://aws.amazon.com/ec2/instance-types/
+#       - http://aws.amazon.com/ec2/instance-types/instance-details/
+#   Source JSON files:
+#       - http://aws.amazon.com/ec2/pricing/ , xhr calls
+#
 #
 # todo: currency other than USD
 #
@@ -98,22 +106,39 @@ def parse_file(fn, tbl):
 
             parse_instance_type(src_regional['instanceTypes'], c_term, tbl[c_region][c_os])
 
+def fix_instance_size(c_instance, c_size):
+    """Fix some possible typo
+        cc1.8xlarge => cc2.8xlarge
+        cc2.4xlarge => cg1.4xlarge
+        Ref:
+           - http://aws.amazon.com/ec2/instance-types/instance-details/
+           - https://github.com/erans/ec2instancespricing/commit/71a24aaef1d2ceed2f3e4cefecc9b34b6d5f35b6
+    """
+    for typo in CONFIG['remap']['instance_size']:
+        if typo['replace']['instance'] == c_instance and typo['replace']['size'] == c_size:
+            return (typo['with']['instance'], typo['with']['size'])
+            
+    return (c_instance, c_size)
+
 def parse_instance_type(src_its, c_term, tbl_its ):
     for src_it in src_its:
-        c_type = lookup_dict(src_it['type'], CONFIG['remap']['instances'])
-        if c_type not in tbl_its.keys():
-            tbl_its[c_type] = {}
+        c_instance = lookup_dict(src_it['type'], CONFIG['remap']['instances'])
 
         for src_sz in src_it['sizes']:
             c_size = lookup_dict(src_sz['size'], CONFIG['remap']['sizes'])
 
-            if c_size not in tbl_its[c_type].keys():
-                tbl_its[c_type][c_size] = {}
+            (fixed_instance, fixed_size) = fix_instance_size(c_instance, c_size)
+            
+            if fixed_instance not in tbl_its.keys():
+                tbl_its[fixed_instance] = {}
+            
+            if fixed_size not in tbl_its[fixed_instance].keys():
+                tbl_its[fixed_instance][fixed_size] = {}
 
             if is_term_od(c_term):
-                parse_od(src_sz, tbl_its[c_type][c_size])
+                parse_od(src_sz, tbl_its[fixed_instance][fixed_size])
             else:
-                parse_ri(src_sz, c_term, tbl_its[c_type][c_size])
+                parse_ri(src_sz, c_term, tbl_its[fixed_instance][fixed_size])
 
 def parse_od(src_sz, tbl_sz):
     src_prices = src_sz['valueColumns'][0]['prices']

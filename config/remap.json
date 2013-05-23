@@ -32,5 +32,15 @@
         "xxl":          "2xlarge",
         "xxxxl":        "4xlarge",
         "xxxxxxxxl":    "8xlarge"
-    }
+    },
+    "instance_size": [
+        {
+            "replace":  {"instance":"cc1", "size": "8xlarge"},
+            "with":     {"instance":"cc2", "size": "8xlarge"}
+        },
+        {
+            "replace":  {"instance":"cc2", "size": "4xlarge"},
+            "with":     {"instance":"cg1", "size": "4xlarge"}
+        }
+    ]
 }
