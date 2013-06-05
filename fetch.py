@@ -245,7 +245,7 @@ def truncate_depth_worker(obj, max_depth):
 def proc_args():
     from argparse import ArgumentParser
 
-    tbl = CONFIG['lang']['help']
+    tbl = CONFIG['lang']['usage']
 
     parser = ArgumentParser(add_help=True, description=tbl['app'])
     
@@ -332,7 +332,7 @@ def cleanup():
 
 PATH = {}
 
-PATH['ROOT']    = os.path.realpath(__file__ + '/../..')
+PATH['ROOT']    = os.path.realpath(__file__ + '/..')
 PATH['CONFIG']  = os.path.join(PATH['ROOT'], 'config')
 PATH['TMP']     = os.path.join(PATH['ROOT'], 'tmp')
 
