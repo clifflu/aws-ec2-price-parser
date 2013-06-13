@@ -20,7 +20,7 @@ class Parser extends base\Util {
         if ($this->can_load_from_cache())
             return file_get_contents(static::cache_fn());
 
-        $data = json_encode($this->parse(), JSON_UNESCAPED_UNICODE);
+        $data = static::json_encode($this->parse());
         file_put_contents(self::cache_fn(), $data);
 
         return $data;
@@ -31,9 +31,14 @@ class Parser extends base\Util {
             return json_decode(file_get_contents(static::cache_fn()), true);
 
         $data = $this->parse;
-        file_put_contents(self::cache_fn(), json_encode($data, JSON_UNESCAPED_UNICODE));
+        file_put_contents(self::cache_fn(), static::json_encode($data));
 
         return $data;   
+    }
+
+    protected function json_encode($arr) {
+        $str = json_encode($arr, JSON_UNESCAPED_UNICODE);
+        return $str;
     }
 
     protected function cache_fn() {
@@ -78,7 +83,11 @@ class Parser extends base\Util {
         $output = $this->truncate_nulls($output);
         ksort_recursive($output);
 
-        return $output;
+        return [
+            'sequence' => ['region', 'os', 'instance', 'size', 'term'],
+            'tags' => $this->config['tags'],
+            'data' => $output,
+        ];
     }
 
     /**
@@ -114,7 +123,7 @@ class Parser extends base\Util {
     }
 
     protected function guess_os($fn) {
-        foreach ($this->config['tags']['oses'] as $os => $desc) {
+        foreach ($this->config['tags']['os'] as $os => $desc) {
             if (strncmp($os.'-', $fn, strlen($os)+1) === 0)
                 return $os;
         }

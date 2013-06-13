@@ -1,5 +1,5 @@
 {
-    "regions": {
+    "region": {
         "us-east-1":        "US East (N. Virginia)",
         "us-west-1":        "US West (Northern California)",
         "us-west-2":        "US West (Oregon)",
@@ -9,7 +9,7 @@
         "ap-northeast-1":   "Asia Pacific (Tokyo)",
         "ap-southeast-2":   "Asia Pacific (Sydney)"
     },
-    "oses": {
+    "os": {
         "linux": "Linux/UNIX Usage",
         "mswin": "Windows",
         "mswinSQL": "Windows with SQL",
@@ -17,7 +17,7 @@
         "rhel": "Red Hat Enterprise",
         "sles": "SUSE"
     },
-    "instances": {
+    "instance": {
         "t1": "Micro",
         "m1":  "Standard",
         "m3": "Second Generation Standard",
@@ -29,7 +29,7 @@
         "cr1": "Cluster High-Memory",
         "cc2": "Cluster GPU"
     },
-    "sizes": {
+    "size": {
         "micro":    "Micro",
         "small":    "Small",
         "medium":   "Medium",
@@ -39,7 +39,7 @@
         "4xlarge":  "Quadruple Extra Large",
         "8xlarge":  "Eight Extra Large"
     },
-    "terms": {
+    "term": {
         "od":  "On Demand",
         "y1l":  "1 yr Term, Light Utilization",
         "y1m":  "1 yr Term, Medium Utilization",
