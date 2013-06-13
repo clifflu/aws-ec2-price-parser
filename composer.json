@@ -1,5 +1,8 @@
 {
+    "autoload": {
+        "classmap": ["include/"]
+    },
     "require": {
-        "shuber/curl": "dev-master"
+        "stil/curl-easy": "dev-master"
     }
 }

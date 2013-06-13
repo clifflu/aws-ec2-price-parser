@@ -6,7 +6,7 @@ namespace clifflu\aws_ec2_price_tool\base;
  * 
  * 透過 static::defaults() 產生預設 config，並透過 forge() 生成實體
  */
-abstract class Forge extends Debug{
+abstract class Forge{
     protected $config;
 
     // ===========================

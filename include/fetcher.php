@@ -1,7 +1,7 @@
 <?php
 namespace clifflu\aws_ec2_price_tool;
 
-class Fetcher extends base\Base{
+class Fetcher extends base\Util{
     private $_now = false;
 
     protected function __construct($config) {
@@ -12,7 +12,7 @@ class Fetcher extends base\Base{
     /**
      * Fetch remote files if needed
      * 
-     * @return int number of files modified
+     * @return int number of files fetched
      */
     public function go() {
         $fetch_list = [];
@@ -21,19 +21,23 @@ class Fetcher extends base\Base{
             $local_fn = $this->local_fn($fn);
             $aws_url = $this->aws_url($fn);
 
-            if ($this->need_fetch($fn, $local_fn, $aws_url)) {
-                $fetch_list[] = [$fn, $local_fn, $aws_url];
+            if ($this->need_fetch($local_fn, $aws_url)) {
+                $fetch_list[] = [
+                    'local_fn' => $local_fn, 
+                    'aws_url' => $aws_url,
+                    'fn' => $fn,
+                ];
             }
         }
 
-        foreach($fetch_list as $entry) {
-            $this->fetch($entry[0], $entry[1], $entry[2]);
-        }
+        $start = microtime(true);
+        $cnt = $this->fetch($fetch_list);
+        $dur = microtime(true) - $start;
 
-        return count($fetch_list);
+        printf("%d files fetched in %.2f seconds\n", $cnt, $dur);
     }
     
-    function need_fetch($fn, $local_fn, $aws_url) {
+    protected function need_fetch($local_fn, $aws_url) {
         $mtime = lstat($local_fn)['mtime'];
         
         // don't fetch if modified recently
@@ -50,8 +54,39 @@ class Fetcher extends base\Base{
      * Fetch data files from AWS
      * @return [type] [description]
      */
-    function fetch($fn, $local_fn, $aws_url) {
-        return;
-        throw new \Exception('todo');
+    protected function fetch($filelist) {
+        $cnt = count($filelist);
+
+        while($buffer = array_splice($filelist, 0, $this->config['fetch']['max_threads'])) {
+            $this->fetch_worker($buffer);
+        }
+
+        return $cnt;
+    }
+
+    protected function fetch_worker($filelist) {
+        $queue = new \cURL\RequestsQueue;
+        $queue->getDefaultOptions()
+            ->set(CURLOPT_TIMEOUT, 10)
+            ->set(CURLOPT_RETURNTRANSFER, true);
+
+        foreach($filelist as $idx => $entry) {
+            $req = new \cURL\Request($entry['aws_url']);
+            $filelist[$idx]['UID'] = $req->getUID();
+            $queue->attach($req);
+        }
+
+        $queue->addListener('complete', function(\cURL\Event $event) use (&$filelist){
+            $uid = $event->request->getUID();
+            foreach($filelist as $idx => $entry) {
+                if ($entry['UID'] != $uid)
+                    continue;
+
+                // UID match
+                file_put_contents($entry['local_fn'], $event->response->getContent());
+            }
+        }) ;
+
+        $queue->send();
     }
 }
