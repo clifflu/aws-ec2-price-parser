@@ -3,6 +3,7 @@
         "classmap": ["include/"]
     },
     "require": {
-        "stil/curl-easy": "dev-master"
+        "stil/curl-easy": "dev-master",
+        "components/jquery": "*"
     }
 }
