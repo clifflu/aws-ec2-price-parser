@@ -6,18 +6,79 @@
 namespace clifflu\aws_ec2_price_tool;
 
 class Parser extends base\Util {
+    // =======================
+    // Output & Cache
+    // =======================
+
     /**
-     * Parse fetched files
-     * @return [type] [description]
+     * Retrieves fetched result as JSON string; 
+     * Use cache if applicable.
+     * 
+     * @return String
      */
-    public function parsed() {
+    public function get_json() {
+        if ($this->can_load_from_cache())
+            return file_get_contents(static::cache_fn());
+
+        $data = json_encode($this->parse(), JSON_UNESCAPED_UNICODE);
+        file_put_contents(self::cache_fn(), $data);
+
+        return $data;
+    }
+
+    public function get_data() {
+        if ($this->can_load_from_cache())
+            return json_decode(file_get_contents(static::cache_fn()), true);
+
+        $data = $this->parse;
+        file_put_contents(self::cache_fn(), json_encode($data, JSON_UNESCAPED_UNICODE));
+
+        return $data;   
+    }
+
+    protected function cache_fn() {
+        return PATH_TMP.'parsed.cache.json';
+    }
+
+    protected function can_load_from_cache() {
+        $fn = static::cache_fn();
+
+        if (!(is_file($fn) && is_readable($fn)))
+            return false;
+
+        if (static::file_age($fn) > $this->config['fetch']['expire_hour'] * 3600)
+            return false;
+
+
+        if (static::file_age($fn) > $this->config['fetch']['expire_hour'] * 1800)
+            return true;
+
+        $mtime = static::file_mtime($fn);
+
+        foreach($this->config['fetch']['files'] as $fn) {
+            if (static::file_mtime($this->local_fn($fn)) > $mtime)
+                return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Parse fetched files, return as PHP array
+     * 
+     * @return Array
+     */
+    protected function parse() {
         $output = array();
         $fetch_list = $this->config['fetch']['files'] ;
 
         foreach ($fetch_list as $fn)
             $this->parse_file($fn, $output);
 
-        return $this->truncate_nulls($output);
+        $output = $this->truncate_nulls($output);
+        ksort_recursive($output);
+
+        return $output;
     }
 
     /**

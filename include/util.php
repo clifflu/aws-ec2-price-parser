@@ -26,6 +26,11 @@ function num($str) {
     return is_numeric($str) ? $str * 1 : null;
 }
 
-function say($msg) {
-    echo preg_replace('/[\s\r\n]+$/', '', $msg)."\n";
+function ksort_recursive(&$array) {
+    ksort($array);
+
+    foreach($array as $idx => &$itm) {
+        if (is_array($itm))
+            ksort_recursive($itm);
+    }
 }

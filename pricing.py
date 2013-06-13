@@ -33,10 +33,10 @@ def lookup_dict(key, tbl):
     return key
 
 def aws_url(fn):
-    return CONFIG['filelist']['prefix'] + fn + CONFIG['filelist']['appendix']
+    return CONFIG['fetch']['prefix'] + fn + CONFIG['fetch']['appendix']
 
 def local_fn(fn):
-    return os.path.join(PATH['TMP'], fn + CONFIG['filelist']['appendix'])
+    return os.path.join(PATH['TMP'], fn + CONFIG['fetch']['appendix'])
 
 def build_lookup_table(src, dest):
     for key in src:
@@ -273,7 +273,7 @@ def need_fetch():
     past = datetime.datetime.now() - datetime.timedelta(days=ARGS.days_expire)
     past = time.mktime(past.timetuple())
     
-    for fn in CONFIG['filelist']['files']:
+    for fn in CONFIG['fetch']['files']:
         fn = local_fn(fn)
         
         if not os.path.isfile(fn):
@@ -290,13 +290,13 @@ def fetch():
         return
 
     import urllib
-    for fn in CONFIG['filelist']['files']:
+    for fn in CONFIG['fetch']['files']:
         urllib.urlretrieve(aws_url(fn), local_fn(fn))
 
 def convert():
     """Convert downloaded files"""
     output = {}
-    fetch_list = CONFIG['filelist']['files']
+    fetch_list = CONFIG['fetch']['files']
     for fn in fetch_list:
         parse_file(fn, output)
 
@@ -321,7 +321,7 @@ def cleanup():
     if not ARGS.cleanup:
         return
 
-    for fn in CONFIG['filelist']['files']:
+    for fn in CONFIG['fetch']['files']:
         fn = local_fn(fn)
         if os.path.isfile(fn):
             os.unlink(fn)
@@ -340,7 +340,7 @@ PATH['TMP']     = os.path.join(PATH['ROOT'], 'tmp')
 # Load Config Files
 #
 
-CONFIG = {'filelist': None, 'lang': None, 'remap': None, 'tags': None}
+CONFIG = {'fetch': None, 'lang': None, 'remap': None, 'tags': None}
 
 for fn in CONFIG:
     with open(os.path.join(PATH['CONFIG'], fn + '.json'), 'r') as fp:

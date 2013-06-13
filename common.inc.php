@@ -28,27 +28,3 @@ require(PATH_INC . 'util.php');
 
 /* autoloader */
 require('vendor/autoload.php');
-
-// ========================
-// Load Config Files
-// ========================
-
-$CONFIG = array(
-    'fetch'=> null, 
-    'lang'=> null, 
-    'remap'=> null, 
-    'tags'=> null
-);
-
-foreach ($CONFIG as $fn => $val) {
-    $CONFIG[$fn] = json_decode(file_get_contents(PATH_CONFIG . $fn . '.json'), true);
-}
-
-// ========================
-// Build Lookup Tables
-// ========================
-
-foreach ($CONFIG['remap']['_lookup'] as $tbl_name => $contents) {
-    $CONFIG['remap'][$tbl_name] = array();
-    build_lookup_table($contents, $CONFIG['remap'][$tbl_name]);
-}

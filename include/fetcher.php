@@ -2,19 +2,12 @@
 namespace clifflu\aws_ec2_price_tool;
 
 class Fetcher extends base\Util{
-    private $_now = false;
-
-    protected function __construct($config) {
-        parent::__construct($config);
-        $this->_now = time();
-    }
-
     /**
      * Fetch remote files if needed
      * 
      * @return int number of files fetched
      */
-    public function go() {
+    public function start() {
         $fetch_list = [];
 
         foreach ($this->config['fetch']['files'] as $fn) {
@@ -30,18 +23,12 @@ class Fetcher extends base\Util{
             }
         }
 
-        $start = microtime(true);
-        $cnt = $this->fetch($fetch_list);
-        $dur = microtime(true) - $start;
-
-        printf("%d files fetched in %.2f seconds\n", $cnt, $dur);
+        return $this->fetch($fetch_list);
     }
     
     protected function need_fetch($local_fn, $aws_url) {
-        $mtime = lstat($local_fn)['mtime'];
-        
         // don't fetch if modified recently
-        if ($mtime > ($this->_now - $this->config['fetch']['expire_hour'] * 3600)) {
+        if (static::file_age($local_fn) <= $this->config['fetch']['expire_hour'] * 3600) {
             return false;
         }
 

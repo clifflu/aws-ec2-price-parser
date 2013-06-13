@@ -25,6 +25,6 @@ abstract class Forge{
         if (!$overrides)
             return array();
 
-        return array_merge(array(), (array) $overrides);
+        return (array) $overrides;
     }
 }

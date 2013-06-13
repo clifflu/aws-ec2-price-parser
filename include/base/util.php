@@ -22,6 +22,21 @@ abstract class Util extends Forge{
         return static::aws_url_config($fn, $this->config);
     }
 
+    private static $_now = null;
+    
+    public static function file_age($filename) {
+        if (self::$_now == null)
+            self::$_now = time();
+
+        return self::$_now - self::file_mtime($filename);
+    }
+
+    public static function file_mtime($filename) {
+        if (!(is_file($filename) && is_readable($filename)))
+            return 0;
+        return lstat($filename)['mtime'];
+    }
+
     // ========================
     // Truncate empty data
     // ========================
@@ -66,11 +81,11 @@ abstract class Util extends Forge{
     // ========================
     
     /**
-     * Populates $CONFIG, ignores $overrides
+     * Populates $CONFIG
      * 
      * @return array Default config
      */
-    public static function defaults($overrides = null) {
+    public static function defaults($config = null) {
         $CONFIG = array(
             'fetch'=> null, 
             'lang'=> null, 
@@ -79,15 +94,20 @@ abstract class Util extends Forge{
         );
 
         foreach ($CONFIG as $fn => $val) {
-            $CONFIG[$fn] = json_decode(file_get_contents(PATH_CONFIG . $fn . '.json'), true);
+            if (is_null($val))
+                $CONFIG[$fn] = json_decode(file_get_contents(PATH_CONFIG . $fn . '.json'), true);
         }
 
         /* Build Lookup Tables */
         foreach ($CONFIG['remap']['_lookup'] as $tbl_name => $contents) {
             $CONFIG['remap'][$tbl_name] = array();
             ROOT_NS\build_lookup_table($contents, $CONFIG['remap'][$tbl_name]);
-        }
+        }            
 
+        if (!is_null($config)) {
+            $CONFIG = array_replace_recursive($CONFIG, $config);
+        }
+        
         return parent::defaults($CONFIG);
     }
 }
