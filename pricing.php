@@ -8,5 +8,6 @@
 
 require_once('common.inc.php');
 
-fetch();
+$fetcher = clifflu\aws_ec2_price_tool\Fetcher::forge($CONFIG);
+$fetcher->go();
 //echo json_encode(convert());

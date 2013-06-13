@@ -3,18 +3,10 @@
  * 
  */
 
+namespace clifflu\aws_ec2_price_tool;
+
 function lookup_dict($key, &$tbl) {
     return isset($tbl[$key]) ? $tbl[$key] : $key;
-}
-
-function aws_url($fn) {
-    global $CONFIG;
-    return $CONFIG['filelist']['prefix'] + $fn + $CONFIG['filelist']['appendix'];
-}
-
-function local_fn($fn) {
-    global $CONFIG;
-    return PATH_TMP . $fn . $CONFIG['filelist']['appendix'] ;
 }
 
 /**
@@ -32,4 +24,8 @@ function build_lookup_table($src, &$dest) {
     
 function num($str) {
     return is_numeric($str) ? $str * 1 : null;
+}
+
+function say($msg) {
+    echo preg_replace('/[\s\r\n]+$/', '', $msg)."\n";
 }

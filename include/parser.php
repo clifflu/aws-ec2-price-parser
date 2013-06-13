@@ -4,6 +4,8 @@
  * 
  */
 
+namespace clifflu\aws_ec2_price_tool;
+
 
 /**
  * Convert downloaded files
@@ -13,7 +15,7 @@ function convert() {
     global $CONFIG;
 
     $output = array();
-    $fetch_list = $CONFIG['filelist']['files'] ;
+    $fetch_list = $CONFIG['fetch']['files'] ;
 
     foreach ($fetch_list as $fn)
         parse_file($fn, $output);
