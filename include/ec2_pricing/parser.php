@@ -77,7 +77,7 @@ class Parser extends ROOT_NS\base\Parser {
         if (!($c_os && $c_term))
             return;
 
-        $src = json_decode(file_get_contents(Common::local_fn($fn)), true);
+        $src = ROOT_NS\util\Data::json_decode(file_get_contents(Common::local_fn($fn)));
 
         // @todo: Currency and Version check
 

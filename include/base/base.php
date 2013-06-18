@@ -4,7 +4,7 @@ use clifflu\aws_tools as ROOT_NS;
 
 abstract class Base extends Forge{
     // =============================
-    //  Abstarct methods
+    //  Overrides
     // =============================
     public static function defaults($overrides = null) {
         $_ = [
@@ -21,6 +21,24 @@ abstract class Base extends Forge{
 
     // =============================
     //  Abstarct methods
+    // =============================
+    abstract public static function get_domain();
+
+    abstract public static function get_lock_fn();
+    /**
+     * 是否所有 cache file 都存在
+     * @return boolean [description]
+     */
+    abstract public function has_cache();
+
+    /**
+     * 是否所有 local cache 都未過期
+     * @return boolean [description]
+     */
+    abstract public function is_cache_valid();
+
+    // =============================
+    //  Utilities
     // =============================
     const S_IN_PROGRESS = 1;
     const S_NOT_EXIST   = 2;
@@ -57,23 +75,4 @@ abstract class Base extends Forge{
 
         return 0;
     }
-
-    // =============================
-    //  Abstarct methods
-    // =============================
-    abstract public static function get_domain();
-
-    abstract public static function get_lock_fn();
-    /**
-     * 是否所有 cache file 都存在
-     * @return boolean [description]
-     */
-    abstract public function has_cache();
-
-    /**
-     * 是否所有 local cache 都未過期
-     * @return boolean [description]
-     */
-    abstract public function is_cache_valid();
-    
 }

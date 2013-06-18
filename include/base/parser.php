@@ -33,10 +33,7 @@ abstract class Parser extends Base {
     }
 
     public function has_cache() {
-        if (!file_exists($this->get_cache_fn()))
-            return false;
-
-        return true;
+        return file_exists($this->get_cache_fn());
     }
 
     public function is_cache_valid() {
@@ -70,7 +67,7 @@ abstract class Parser extends Base {
     abstract public function get_cache_fn();
     
     /**
-     * 重建快取, 呼叫時已保證 $fetcher 執行成功
+     * 重建快取, 呼叫時已保證 $fetcher 執行完畢
      * 
      * @return array
      */
@@ -155,5 +152,9 @@ abstract class Parser extends Base {
             return $this->_get_json_from_cache();
 
         return $this->rebuild();
+    }
+
+    public function get_data() {
+        return ROOT_NS\util\Data::json_decode($this->get_json());
     }
 }

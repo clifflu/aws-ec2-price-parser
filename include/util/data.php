@@ -9,6 +9,11 @@ class Data {
         $str = json_encode($arr, JSON_UNESCAPED_UNICODE);
         return $str;
     }
+
+    public static function json_decode($str) {
+        return json_decode($str, true);
+    }
+    
     /**
      * from http://www.php.net/manual/en/function.base64-encode.php
      * @param byte $data
