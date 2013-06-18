@@ -8,8 +8,13 @@ use clifflu\aws_tools as ROOT_NS;
  * 
  */
 class Parser extends ROOT_NS\base\Parser {
+    use Common;
+
+    // ===========================
+    // Constructor & Overrides
+    // ===========================
     public static function defaults($config = []) {
-        $_ = ROOT_NS\util\Config::get(['fetch', 'remap', 'tags'], 'ec2-pricing');
+        $_ = ROOT_NS\util\Config::get(['fetch', 'remap', 'tags'], static::get_domain());
 
         if ($config)
             $_ = array_replace_recursive($_, $config);
@@ -17,69 +22,29 @@ class Parser extends ROOT_NS\base\Parser {
         return parent::defaults($_);
     }
 
+    public function list_input_fn() {
+        $list = [];
+        foreach($this->config['fetch']['files'] as $fn) {
+            $list[] = $this->local_fn($fn);
+        }
+        return $list;
+    }
+
+
+    public function get_cache_fn() {
+        return ROOT_NS\util\Fs::fn_tmp('parsed.json', $this->get_domain());
+    }
+
     // =======================
     // Output & Cache
     // =======================
-
-    /**
-     * Retrieves fetched result as JSON string; 
-     * Use cache if applicable.
-     * 
-     * @return String
-     */
-    public function get_json() {
-        if ($this->can_load_from_cache())
-            return file_get_contents(static::cache_fn());
-
-        $data = Common::json_encode($this->parse());
-        file_put_contents(self::cache_fn(), $data);
-
-        return $data;
-    }
-
-    public function get_data() {
-        if ($this->can_load_from_cache())
-            return json_decode(file_get_contents(static::cache_fn()), true);
-
-        $data = $this->parse;
-        file_put_contents(self::cache_fn(), static::json_encode($data));
-
-        return $data;   
-    }
-
-    protected function cache_fn() {
-        return PATH_TMP . 'ec2-pricing' . DS . 'parsed.json';
-    }
-
-    protected function can_load_from_cache() {
-        $fn = static::cache_fn();
-
-        if (!(is_file($fn) && is_readable($fn)))
-            return false;
-
-        if (ROOT_NS\util\Fs::file_age($fn) > $this->config['fetch']['expire_hour'] * 3600)
-            return false;
-
-
-        if (ROOT_NS\util\Fs::file_age($fn) > $this->config['fetch']['expire_hour'] * 1800)
-            return true;
-
-        $mtime = ROOT_NS\util\Fs::file_mtime($fn);
-
-        foreach($this->config['fetch']['files'] as $fn) {
-            if (ROOT_NS\util\Fs::file_mtime(Common::local_fn($fn)) > $mtime)
-                return false;
-        }
-
-        return true;
-    }
 
     /**
      * Parse fetched files, return as PHP array
      * 
      * @return Array
      */
-    protected function parse() {
+    protected function _rebuild() {
         $output = array();
         $fetch_list = $this->config['fetch']['files'] ;
 
@@ -95,7 +60,10 @@ class Parser extends ROOT_NS\base\Parser {
             'data' => $output,
         ];
     }
-
+    // =======================
+    // Do the job
+    // =======================
+    
     /**
      * 開啟並分析 fn，並將資料存至 tbl. 由檔名猜測對應的 os 與 term.
      * @param  [type] $fn  [description]

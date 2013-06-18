@@ -1,5 +1,6 @@
 <?php
 namespace clifflu\aws_tools\base;
+use clifflu\aws_tools as ROOT_NS;
 
 /**
  * class Base_Factry
@@ -7,11 +8,12 @@ namespace clifflu\aws_tools\base;
  * 透過 static::defaults() 產生預設 config，並透過 forge() 生成實體
  */
 abstract class Forge{
+    
+    // ===========================
+    // Constructor & Config
+    // ===========================
     protected $config;
 
-    // ===========================
-    // 
-    // ===========================
     protected function __construct($config) {
         $this->config = $config;
     }
@@ -27,4 +29,6 @@ abstract class Forge{
 
         return (array) $overrides;
     }
+
+
 }

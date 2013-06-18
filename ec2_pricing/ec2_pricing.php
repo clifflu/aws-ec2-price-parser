@@ -19,8 +19,9 @@ require_once('../include/common.php');
 
 /* start working */
 $fetcher = ec2_pricing\Fetcher::forge();
-$fetcher->load();
-$fetcher->fetch();
+// $fetcher->sync();
 
 $parser = ec2_pricing\Parser::forge();
+$parser->attach($fetcher);
+
 echo $parser->get_json();

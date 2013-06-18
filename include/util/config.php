@@ -11,7 +11,7 @@ use clifflu\aws_tools as ROOT_NS;
 class Config {
     static protected $_cache = [];
 
-    public static function get($entries, $subdir = '') {
+    public static function get($entries, $domain = '') {
         $config = [];
 
         foreach ($entries as $key => $val) {
@@ -20,7 +20,7 @@ class Config {
                 continue;
             }
 
-            $fn = static::fn($val, $subdir);
+            $fn = Fs::fn_config($val, $domain);
             
             if (!is_file($fn)) {
                 $config[$key] = $val;
@@ -30,15 +30,15 @@ class Config {
             if (is_numeric($key)) 
                 $key = $val;
             
-            $config[$key] = static::get_one($fn, $subdir);
+            $config[$key] = static::get_one($fn, $domain);
         }
 
         return $config;
     }
 
-    public static function get_one($fn, $subdir = '') {
+    public static function get_one($fn, $domain = '') {
         if (!is_file($fn))
-            $fn = static::fn($fn, $subdir);
+            $fn = Fs::fn_config($fn, $domain);
             
         if (!is_file($fn))
             throw new \Exception("Config file '$fn' not found");
@@ -75,9 +75,5 @@ class Config {
             foreach ($val as $alias)
                 $dest[$alias] = $key;
         }
-    }
-
-    public static function fn ($fn, $subdir = '') {
-        return PATH_CONFIG . ($subdir ? $subdir . DS : '') . $fn . '.json';
     }
 }

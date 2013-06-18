@@ -1,8 +1,6 @@
 {
     "prefix" : "http://aws.amazon.com/ec2/pricing/json/",
     "appendix" : ".json",
-    "expire_hour" : 3,
-    "max_threads": 6,
     "files" : [
         "linux-od",
         "linux-ri-light",
