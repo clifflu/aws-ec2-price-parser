@@ -26,7 +26,7 @@ abstract class Fetcher extends Base{
             'expire_hot_s' => 600,
             'expire_cold_h' => 3,
             'lock_patience_s' => 30,
-            'max_threads' => 6,
+            'max_threads' => 16,
         ];
 
         if ($config)
