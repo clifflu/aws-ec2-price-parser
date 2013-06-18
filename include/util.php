@@ -3,7 +3,7 @@
  * 
  */
 
-namespace clifflu\aws_ec2_price_tool;
+namespace clifflu\aws_tools;
 
 function lookup_dict($key, &$tbl) {
     return isset($tbl[$key]) ? $tbl[$key] : $key;
@@ -33,4 +33,39 @@ function ksort_recursive(&$array) {
         if (is_array($itm))
             ksort_recursive($itm);
     }
+}
+
+function config_fn ($fn, $subdir = '') {
+    return PATH_CONFIG . ($subdir ? $subdir . DS : '') . $fn . '.json';
+}
+
+function populate_config($entries, $subdir = '') {
+    $config = [];
+
+    foreach ($entries as $key => $val) {
+        if (!is_string($val)) {
+            $config[$key] = $val;
+            continue;
+        }
+
+        $fn = config_fn($val, $subdir);
+        if (!is_file($fn)) {
+            $config[$key] = $val;
+            continue;
+        }
+        if (is_numeric($key)) 
+            $key = $val;
+        
+        $config[$key] = json_decode(file_get_contents($fn), true);
+    }
+
+    /* Build Lookup Tables */
+    if (isset($config['remap'])) {
+        foreach ($config['remap']['_lookup'] as $tbl_name => $contents) {
+            $config['remap'][$tbl_name] = array();
+            build_lookup_table($contents, $config['remap'][$tbl_name]);
+        }
+    }
+
+    return $config;
 }

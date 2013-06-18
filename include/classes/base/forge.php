@@ -1,5 +1,5 @@
 <?php
-namespace clifflu\aws_ec2_price_tool\base;
+namespace clifflu\aws_tools\base;
 
 /**
  * class Base_Factry

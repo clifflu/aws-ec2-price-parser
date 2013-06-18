@@ -3,7 +3,7 @@
  * parse.php - 解析由 fetch.php 抓下來的檔案，重整並輸出
  * 
  */
-namespace clifflu\aws_ec2_price_tool;
+namespace clifflu\aws_tools;
 
 class Parser extends base\Util {
     // =======================

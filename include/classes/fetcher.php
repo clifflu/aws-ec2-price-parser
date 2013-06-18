@@ -1,5 +1,5 @@
 <?php
-namespace clifflu\aws_ec2_price_tool;
+namespace clifflu\aws_tools;
 
 class Fetcher extends base\Util{
     /**

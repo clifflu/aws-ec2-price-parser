@@ -1,6 +1,5 @@
 <?php
-namespace clifflu\aws_ec2_price_tool\base;
-use clifflu\aws_ec2_price_tool as ROOT_NS;
+namespace clifflu\aws_tools\base;
 
 abstract class Util extends Forge{
     // =========================
@@ -80,34 +79,4 @@ abstract class Util extends Forge{
     // Overrides
     // ========================
     
-    /**
-     * Populates $CONFIG
-     * 
-     * @return array Default config
-     */
-    public static function defaults($config = null) {
-        $CONFIG = array(
-            'fetch'=> null, 
-            'lang'=> null, 
-            'remap'=> null, 
-            'tags'=> null
-        );
-
-        foreach ($CONFIG as $fn => $val) {
-            if (is_null($val))
-                $CONFIG[$fn] = json_decode(file_get_contents(PATH_CONFIG . $fn . '.json'), true);
-        }
-
-        /* Build Lookup Tables */
-        foreach ($CONFIG['remap']['_lookup'] as $tbl_name => $contents) {
-            $CONFIG['remap'][$tbl_name] = array();
-            ROOT_NS\build_lookup_table($contents, $CONFIG['remap'][$tbl_name]);
-        }            
-
-        if (!is_null($config)) {
-            $CONFIG = array_replace_recursive($CONFIG, $config);
-        }
-        
-        return parent::defaults($CONFIG);
-    }
 }

@@ -1,10 +1,10 @@
 /**
- * AWS ec2 pricing AMD module
+ * AWS ec2 pricing tool module
  * @param  {[type]} $){} [description]
  * @return {[type]}        [description]
  */
-//define('ec2-pricing', ['jquery'], 
-pricing = (function ($){
+
+ec2_pricing = (function ($){
     var _data, 
         _xhr;
 
@@ -86,7 +86,7 @@ pricing = (function ($){
     }
 
     function init(){
-        _xhr = $.getJSON('pricing.php').
+        _xhr = $.getJSON('ec2-pricing.php').
             done(function(data){_data = data;});
     }
 
@@ -96,3 +96,8 @@ pricing = (function ($){
         filter: filter
     };
 })(jQuery);
+
+// export as an AMD module
+if ( typeof define === "function" && define.amd ) {
+    define("ec2-pricing", [], function () { return ec2_pricing; } );
+}
