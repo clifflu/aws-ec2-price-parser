@@ -18,8 +18,8 @@ abstract class Parser extends Base {
     
     public static function defaults($config = []) {
         $_ = [
-            'lock_patience_s' => 3,
-            'expire_hot_s' => 600,
+            'lock_patience_s' => 2,
+            'expire_hot_s' => 1,
         ];
 
         if ($config)
@@ -36,6 +36,11 @@ abstract class Parser extends Base {
         return file_exists($this->get_cache_fn());
     }
 
+    public function is_cache_hot() {
+        $fn = $this->get_cache_fn();
+        return ROOT_NS\util\Fs::file_age($fn) < $this->config['expire_hot_s'];
+    }
+
     public function is_cache_valid() {
         $fn = $this->get_cache_fn();
 
@@ -43,12 +48,17 @@ abstract class Parser extends Base {
             return false;
 
         // still hot
-        if (ROOT_NS\util\Fs::file_age($fn) < $this->config['expire_hot_s'])
+        if ($this->is_cache_hot())
             return true;
 
         $mtime = ROOT_NS\util\Fs::file_mtime($fn);
         foreach($this->list_input_fn() as $fn) {
             if (ROOT_NS\util\Fs::file_mtime($fn) > $mtime)
+                return false;
+        }
+
+        foreach($this->_fetchers as $f) {
+            if (!$f->is_cache_valid())
                 return false;
         }
 
@@ -91,17 +101,15 @@ abstract class Parser extends Base {
         $lock_fn = ROOT_NS\util\Fs::fn_parser_lock($this->get_domain());
         $sleep_us = $this->config['sleep_lock_s'] * 1000000;
 
-        $fp = fopen($lock_fn, 'w');
-        if (!flock($fp, LOCK_EX | LOCK_NB)) {
+        if (!$this->lock_acquire()) {
+            $this->lock_waive();
             // can't acquire lock, another parser is running.
-            
             $wait_start = microtime(true);
 
             // wait for it until lock_patience_s
             while(microtime(true) - $wait_start < $this->config['lock_patience_s']) {
                 usleep($sleep_us);
-                if ($this->is_cache_valid()) {
-                    fclose($fp);
+                if ($this->is_cache_hot()) {
                     return $this->_get_json_from_cache();
                 }
             }
@@ -116,12 +124,14 @@ abstract class Parser extends Base {
             return $this->_get_json_from_cache();
         }
 
+        // feed fetchers
+        foreach($this->_fetchers as $f)
+            $f->sync();
+
         $output = ROOT_NS\util\Data::json_encode($this->_rebuild());
         ROOT_NS\util\Fs::fdump($this->get_cache_fn(), $output);
 
-        flock($fp, LOCK_UN);
-        fclose($fp);
-        unlink($lock_fn);
+        $this->lock_release();
 
         return $output;
     }
@@ -144,10 +154,6 @@ abstract class Parser extends Base {
      * @return [type] [description]
      */
     public function get_json() {
-        // feed fetchers
-        foreach($this->_fetchers as $f)
-            $f->sync();
-
         if ($this->is_cache_valid())
             return $this->_get_json_from_cache();
 
@@ -156,5 +162,34 @@ abstract class Parser extends Base {
 
     public function get_data() {
         return ROOT_NS\util\Data::json_decode($this->get_json());
+    }
+
+    // ===========================
+    // Lock
+    // ===========================
+    private $_lock_fp = null;
+
+    protected function lock_acquire() {
+        $lock_fn = ROOT_NS\util\Fs::fn_parser_lock($this->get_domain());
+        $this->_lock_fp = fopen($lock_fn, 'w');
+        return flock($this->_lock_fp, LOCK_EX | LOCK_NB);
+    }
+
+    protected function lock_waive() {
+        if (!is_resource($this->_lock_fp))
+            return;
+
+        fclose($this->_lock_fp);
+    }
+
+    protected function lock_release() {
+        if (!is_resource($this->_lock_fp))
+            return;
+
+        $lock_fn = ROOT_NS\util\Fs::fn_parser_lock($this->get_domain());
+
+        flock($this->_lock_fp, LOCK_UN);
+        fclose($this->_lock_fp);
+        unlink($lock_fn);
     }
 }

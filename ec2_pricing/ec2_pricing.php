@@ -14,7 +14,6 @@ header('Content-Type: application/json; charset=utf-8');
 require_once('../include/common.php');
 
 $parser = ec2_pricing\Parser::forge();
-
 $fetcher = ec2_pricing\Fetcher::forge();
 $parser->attach($fetcher);
 
