@@ -14,12 +14,13 @@ namespace clifflu\aws_tools;
 require_once('../include/common.php');
 
 /* configs */
-$config = populate_config(['fetch', 'tags', 'remap'], 'ec2-pricing');
+//$config = populate_config(['fetch', 'tags', 'remap'], 'ec2-pricing');
 //echo(json_encode($config));die();
 
 /* start working */
-$fetcher = Fetcher::forge($config);
-$fetcher->start();
+$fetcher = ec2_pricing\Fetcher::forge();
+$fetcher->load();
+$fetcher->fetch();
 
-$parser = Parser::forge($config);
+$parser = ec2_pricing\Parser::forge();
 echo $parser->get_json();

@@ -1,5 +1,5 @@
 {
-    "_lookup": {
+    "__lookup__": {
         "instances": {
             "m1": ["stdODI", "stdResI"],
             "m3": ["secgenstdODI", "secgenstdResI"],

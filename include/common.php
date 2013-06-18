@@ -24,8 +24,5 @@ ini_set('display_errors', 1);
 /* vendor */
 require(PATH_INC . 'vendor' . DS . 'args.php');
 
-/* util */
-require(PATH_INC . 'util.php');
-
 /* autoloader */
 require(PATH_ROOT . 'vendor/autoload.php');

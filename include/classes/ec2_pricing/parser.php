@@ -1,11 +1,22 @@
 <?php
+
+namespace clifflu\aws_tools\ec2_pricing;
+use clifflu\aws_tools as ROOT_NS;
+
 /**
  * parse.php - 解析由 fetch.php 抓下來的檔案，重整並輸出
  * 
  */
-namespace clifflu\aws_tools;
+class Parser extends ROOT_NS\base\Parser {
+    public static function defaults($config = []) {
+        $_ = ROOT_NS\util\Config::get(['fetch', 'remap', 'tags'], 'ec2-pricing');
 
-class Parser extends base\Util {
+        if ($config)
+            $_ = array_replace_recursive($_, $config);
+
+        return parent::defaults($_);
+    }
+
     // =======================
     // Output & Cache
     // =======================
@@ -20,7 +31,7 @@ class Parser extends base\Util {
         if ($this->can_load_from_cache())
             return file_get_contents(static::cache_fn());
 
-        $data = static::json_encode($this->parse());
+        $data = Common::json_encode($this->parse());
         file_put_contents(self::cache_fn(), $data);
 
         return $data;
@@ -36,13 +47,8 @@ class Parser extends base\Util {
         return $data;   
     }
 
-    protected function json_encode($arr) {
-        $str = json_encode($arr, JSON_UNESCAPED_UNICODE);
-        return $str;
-    }
-
     protected function cache_fn() {
-        return PATH_TMP.'parsed.cache.json';
+        return PATH_TMP . 'ec2-pricing' . DS . 'parsed.json';
     }
 
     protected function can_load_from_cache() {
@@ -51,17 +57,17 @@ class Parser extends base\Util {
         if (!(is_file($fn) && is_readable($fn)))
             return false;
 
-        if (static::file_age($fn) > $this->config['fetch']['expire_hour'] * 3600)
+        if (ROOT_NS\util\Fs::file_age($fn) > $this->config['fetch']['expire_hour'] * 3600)
             return false;
 
 
-        if (static::file_age($fn) > $this->config['fetch']['expire_hour'] * 1800)
+        if (ROOT_NS\util\Fs::file_age($fn) > $this->config['fetch']['expire_hour'] * 1800)
             return true;
 
-        $mtime = static::file_mtime($fn);
+        $mtime = ROOT_NS\util\Fs::file_mtime($fn);
 
         foreach($this->config['fetch']['files'] as $fn) {
-            if (static::file_mtime($this->local_fn($fn)) > $mtime)
+            if (ROOT_NS\util\Fs::file_mtime(Common::local_fn($fn)) > $mtime)
                 return false;
         }
 
@@ -80,8 +86,8 @@ class Parser extends base\Util {
         foreach ($fetch_list as $fn)
             $this->parse_file($fn, $output);
 
-        $output = $this->truncate_nulls($output);
-        ksort_recursive($output);
+        $output = ROOT_NS\util\Data::truncate_nulls($output);
+        ROOT_NS\util\Data::ksort_recursive($output);
 
         return [
             'sequence' => ['region', 'os', 'instance', 'size', 'term'],
@@ -103,12 +109,12 @@ class Parser extends base\Util {
         if (!($c_os && $c_term))
             return;
 
-        $src = json_decode(file_get_contents($this->local_fn($fn)), true);
+        $src = json_decode(file_get_contents(Common::local_fn($fn)), true);
 
         // @todo: Currency and Version check
 
         foreach ($src['config']['regions'] as $src_regional) {
-            $c_region = lookup_dict($src_regional['region'], $this->config['remap']['regions']);
+            $c_region = ROOT_NS\util\Data::lookup_dict($src_regional['region'], $this->config['remap']['regions']);
             
             // @todo: check region
 
@@ -170,10 +176,10 @@ class Parser extends base\Util {
 
     protected function parse_instance_type($src_its, $c_term, &$tbl_its ) {
         foreach($src_its as $src_it) {
-            $c_instance = lookup_dict($src_it['type'], $this->config['remap']['instances']);
+            $c_instance = ROOT_NS\util\Data::lookup_dict($src_it['type'], $this->config['remap']['instances']);
 
             foreach ($src_it['sizes'] as $src_sz) {
-                $c_size = lookup_dict($src_sz['size'], $this->config['remap']['sizes']);
+                $c_size = ROOT_NS\util\Data::lookup_dict($src_sz['size'], $this->config['remap']['sizes']);
 
                 list($fixed_instance, $fixed_size) = $this->fix_instance_size($c_instance, $c_size);
                 
@@ -193,7 +199,7 @@ class Parser extends base\Util {
 
     protected function parse_od($src_sz, &$tbl_sz) {
         $src_prices = $src_sz['valueColumns'][0]['prices'];
-        $tbl_sz['od'] = array(num($src_prices['USD']));
+        $tbl_sz['od'] = array(ROOT_NS\util\Data::num($src_prices['USD']));
     }
 
     protected function parse_ri($src_sz, $c_term, &$tbl_sz) {
@@ -202,16 +208,16 @@ class Parser extends base\Util {
         foreach ($src_vcs as $vc) {
             switch($vc['name']){
                 case 'yrTerm1':
-                    $upfront_1 = num($vc['prices']['USD']);
+                    $upfront_1 = ROOT_NS\util\Data::num($vc['prices']['USD']);
                     break;
                 case 'yrTerm3':
-                    $upfront_3 = num($vc['prices']['USD']);
+                    $upfront_3 = ROOT_NS\util\Data::num($vc['prices']['USD']);
                     break;
                 case 'yrTerm1Hourly':
-                    $hourly_1 = num($vc['prices']['USD']);
+                    $hourly_1 = ROOT_NS\util\Data::num($vc['prices']['USD']);
                     break;
                 case 'yrTerm3Hourly':
-                    $hourly_3 = num($vc['prices']['USD']);
+                    $hourly_3 = ROOT_NS\util\Data::num($vc['prices']['USD']);
                     break;
             }
         }
