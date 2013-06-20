@@ -56,8 +56,8 @@ class Parser extends ROOT_NS\base\Parser {
 
         return [
             'sequence' => ['region', 'os', 'instance', 'size', 'term'],
-            'tags' => $this->config['tags'],
-            'data' => $output,
+            'tag' => $this->config['tags'],
+            'pricing' => $output,
         ];
     }
     // =======================

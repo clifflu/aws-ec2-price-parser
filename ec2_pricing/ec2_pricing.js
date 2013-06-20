@@ -44,8 +44,8 @@ ec2_pricing = (function ($){
 
         return {
             "sequence": d.sequence,
-            "tags": d.tags,
-            "data": output
+            "tag": d.tags,
+            "pricing": output
         };
     }
 
@@ -99,5 +99,5 @@ ec2_pricing = (function ($){
 
 // export as an AMD module
 if ( typeof define === "function" && define.amd ) {
-    define("ec2-pricing", [], function () { return ec2_pricing; } );
+    define("ec2_pricing", [], function () { return ec2_pricing; } );
 }
