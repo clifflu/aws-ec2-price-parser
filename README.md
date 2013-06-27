@@ -19,7 +19,8 @@ ec2_pricing
 -----------------------------
 
 Usage:
-    http://[PATH_TO_REPO]/ec2_pricing/ec2_pricing.php
+    Request http://[PATH_TO_REPO]/ec2_pricing/ec2_pricing.php
+    Demo: http://home.clifflu.net/aws-tools/ec2_pricing/ec2_pricing.php
 
 Config:
 * config/ec2_pricing/ : 
