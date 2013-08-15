@@ -1,7 +1,7 @@
 <?php
 
-namespace clifflu\aws_tools\ec2_pricing;
-use clifflu\aws_tools as ROOT_NS;
+namespace clifflu\aws_prices\ec2;
+use clifflu\aws_prices as ROOT_NS;
 
 /**
  * parse.php - 解析由 fetch.php 抓下來的檔案，重整並輸出

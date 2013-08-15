@@ -1,11 +1,11 @@
 <?php
 
-namespace clifflu\aws_tools\ec2_pricing;
-use clifflu\aws_tools as ROOT_NS;
+namespace clifflu\aws_prices\ec2;
+use clifflu\aws_prices as ROOT_NS;
 
 trait Common {
     public static function get_domain() {
-        return 'ec2_pricing';
+        return 'ec2';
     }
 
     public static function local_fn($fn) {

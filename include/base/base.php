@@ -1,6 +1,6 @@
 <?php
-namespace clifflu\aws_tools\base;
-use clifflu\aws_tools as ROOT_NS;
+namespace clifflu\aws_prices\base;
+use clifflu\aws_prices as ROOT_NS;
 
 abstract class Base extends Forge{
     // =============================
