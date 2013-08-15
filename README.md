@@ -12,15 +12,15 @@ REQUIREMENTS
 
 INSTALLATION
 -----------------------------
-* git clone http://github.com/clifflu/aws-tools.git
-* make sure tmp/ is writable for httpd
+* git clone http://github.com/clifflu/aws-ec2-prices.git
+* make sure tmp/ is writable to httpd
 
 ec2_pricing
 -----------------------------
 
 Usage:
 * Request http://[PATH_TO_REPO]/ec2_pricing/ec2_pricing.php
-* Demo: http://home.clifflu.net/aws-tools/ec2_pricing/ec2_pricing.php
+* Demo: http://home.clifflu.net/aws-ec2-prices/ec2_pricing/ec2_pricing.php
 
 Config:
 * config/ec2_pricing/ : 
