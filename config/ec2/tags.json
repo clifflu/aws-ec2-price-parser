@@ -43,9 +43,9 @@
         "od":  "On Demand",
         "y1l":  "1 yr Term, Light Utilization",
         "y1m":  "1 yr Term, Medium Utilization",
-        "y1h":  "1 yr Term, High Utilization",
+        "y1h":  "1 yr Term, Heavy Utilization",
         "y3l":  "3 yr Term, Light Utilization",
         "y3m":  "3 yr Term, Medium Utilization",
-        "y3h":  "3 yr Term, High Utilization"
+        "y3h":  "3 yr Term, Heavy Utilization"
     }
 }
