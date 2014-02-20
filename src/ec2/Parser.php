@@ -79,11 +79,17 @@ class Parser extends base\Parser {
         if (!($c_os && $c_term))
             return;
 
-        $src = util\Data::json_decode(file_get_contents(Common::local_fn($fn)));
+        $contents = file_get_contents(Common::local_fn($fn));
+        $contents = preg_replace(
+            array('/^\s*callback\s*\(\s*/', '/\s*\)\s*$/'),
+            '', 
+            $contents);
+        $src = util\Data::json_decode($contents);
+        unset($contents);
 
         // @todo: Currency and Version check
 
-        foreach ($src['config']['regions'] as $src_regional) {
+        foreach ((array) @$src['config']['regions'] as $src_regional) {
             $c_region = util\Data::lookup_dict($src_regional['region'], $this->config['remap']['regions']);
             
             // @todo: check region

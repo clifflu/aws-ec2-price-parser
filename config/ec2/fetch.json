@@ -1,6 +1,6 @@
 {
-    "prefix" : "http://aws.amazon.com/ec2/pricing/json/",
-    "appendix" : ".json",
+    "prefix" : "http://aws-assets-pricing-prod.s3.amazonaws.com/pricing/ec2/",
+    "appendix" : ".js?callback=callback",
     "files" : [
         "linux-od",
         "linux-ri-light",
