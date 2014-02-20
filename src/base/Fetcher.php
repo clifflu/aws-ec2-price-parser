@@ -1,6 +1,7 @@
 <?php
-namespace clifflu\aws_prices\base;
-use clifflu\aws_prices as ROOT_NS;
+namespace clifflu\awsPrices\base;
+
+use clifflu\awsPrices\util;
 
 /**
  * Fetcher - 將遠端檔案同步至本地
@@ -36,7 +37,7 @@ abstract class Fetcher extends Base{
     }
     
     public static function get_lock_fn() {
-        return ROOT_NS\util\Fs::fn_fetcher_lock(static::get_domain());
+        return util\Fs::fn_fetcher_lock(static::get_domain());
     }
     
     public function has_cache() {
@@ -50,7 +51,7 @@ abstract class Fetcher extends Base{
 
     public function is_cache_valid() {
         foreach($this->_fetch_queue as $local_fn => $entry) {
-            if (ROOT_NS\util\Fs::file_age($local_fn) > $this->config['expire_hot_s'])
+            if (util\Fs::file_age($local_fn) > $this->config['expire_hot_s'])
                 return false;
         }
 
@@ -129,8 +130,8 @@ abstract class Fetcher extends Base{
             if (false === $local_fn)
                 throw new Excpetion("localfn '$local_fn' not found");
 
-            ROOT_NS\util\Fs::mkdir(dirname($local_fn));
-            ROOT_NS\util\Fs::fdump($local_fn, $event->response->getContent());
+            util\Fs::mkdir(dirname($local_fn));
+            util\Fs::fdump($local_fn, $event->response->getContent());
             unset($joblist[$local_fn]);
 
             $cnt++;
@@ -160,7 +161,7 @@ abstract class Fetcher extends Base{
             return false;
 
         // local file modified recently
-        if (ROOT_NS\util\Fs::file_age($local_fn) <= $this->config['expire_hot_s']) {
+        if (util\Fs::file_age($local_fn) <= $this->config['expire_hot_s']) {
             return true;
         }
 

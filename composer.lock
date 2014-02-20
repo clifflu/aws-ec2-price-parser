@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "d11434f59fbbeb620f929fcc92456ed7",
+    "hash": "3468566a32014495aedf3d546d7ca865",
     "packages": [
         {
             "name": "stil/curl-easy",

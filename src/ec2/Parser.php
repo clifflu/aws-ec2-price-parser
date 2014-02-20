@@ -1,20 +1,22 @@
 <?php
 
-namespace clifflu\aws_prices\ec2;
-use clifflu\aws_prices as ROOT_NS;
+namespace clifflu\awsPrices\ec2;
+
+use clifflu\awsPrices\base;
+use clifflu\awsPrices\util;
 
 /**
  * parse.php - 解析由 fetch.php 抓下來的檔案，重整並輸出
  * 
  */
-class Parser extends ROOT_NS\base\Parser {
+class Parser extends base\Parser {
     use Common;
 
     // ===========================
     // Constructor & Overrides
     // ===========================
     public static function defaults($config = []) {
-        $_ = ROOT_NS\util\Config::get(['fetch', 'remap', 'tags'], static::get_domain());
+        $_ = util\Config::get(['fetch', 'remap', 'tags'], static::get_domain());
 
         if ($config)
             $_ = array_replace_recursive($_, $config);
@@ -32,7 +34,7 @@ class Parser extends ROOT_NS\base\Parser {
 
 
     public function get_cache_fn() {
-        return ROOT_NS\util\Fs::fn_tmp('parsed.json', $this->get_domain());
+        return util\Fs::fn_tmp('parsed.json', $this->get_domain());
     }
 
     // =======================
@@ -51,8 +53,8 @@ class Parser extends ROOT_NS\base\Parser {
         foreach ($fetch_list as $fn)
             $this->parse_file($fn, $output);
 
-        $output = ROOT_NS\util\Data::truncate_nulls($output);
-        ROOT_NS\util\Data::ksort_recursive($output);
+        $output = util\Data::truncate_nulls($output);
+        util\Data::ksort_recursive($output);
 
         return [
             'sequence' => ['region', 'os', 'instance', 'size', 'term'],
@@ -77,12 +79,12 @@ class Parser extends ROOT_NS\base\Parser {
         if (!($c_os && $c_term))
             return;
 
-        $src = ROOT_NS\util\Data::json_decode(file_get_contents(Common::local_fn($fn)));
+        $src = util\Data::json_decode(file_get_contents(Common::local_fn($fn)));
 
         // @todo: Currency and Version check
 
         foreach ($src['config']['regions'] as $src_regional) {
-            $c_region = ROOT_NS\util\Data::lookup_dict($src_regional['region'], $this->config['remap']['regions']);
+            $c_region = util\Data::lookup_dict($src_regional['region'], $this->config['remap']['regions']);
             
             // @todo: check region
 
@@ -144,10 +146,10 @@ class Parser extends ROOT_NS\base\Parser {
 
     protected function parse_instance_type($src_its, $c_term, &$tbl_its ) {
         foreach($src_its as $src_it) {
-            $c_instance = ROOT_NS\util\Data::lookup_dict($src_it['type'], $this->config['remap']['instances']);
+            $c_instance = util\Data::lookup_dict($src_it['type'], $this->config['remap']['instances']);
 
             foreach ($src_it['sizes'] as $src_sz) {
-                $c_size = ROOT_NS\util\Data::lookup_dict($src_sz['size'], $this->config['remap']['sizes']);
+                $c_size = util\Data::lookup_dict($src_sz['size'], $this->config['remap']['sizes']);
 
                 list($fixed_instance, $fixed_size) = $this->fix_instance_size($c_instance, $c_size);
                 
@@ -167,7 +169,7 @@ class Parser extends ROOT_NS\base\Parser {
 
     protected function parse_od($src_sz, &$tbl_sz) {
         $src_prices = $src_sz['valueColumns'][0]['prices'];
-        $tbl_sz['od'] = array(ROOT_NS\util\Data::num($src_prices['USD']));
+        $tbl_sz['od'] = array(util\Data::num($src_prices['USD']));
     }
 
     protected function parse_ri($src_sz, $c_term, &$tbl_sz) {
@@ -176,16 +178,16 @@ class Parser extends ROOT_NS\base\Parser {
         foreach ($src_vcs as $vc) {
             switch($vc['name']){
                 case 'yrTerm1':
-                    $upfront_1 = ROOT_NS\util\Data::num($vc['prices']['USD']);
+                    $upfront_1 = util\Data::num($vc['prices']['USD']);
                     break;
                 case 'yrTerm3':
-                    $upfront_3 = ROOT_NS\util\Data::num($vc['prices']['USD']);
+                    $upfront_3 = util\Data::num($vc['prices']['USD']);
                     break;
                 case 'yrTerm1Hourly':
-                    $hourly_1 = ROOT_NS\util\Data::num($vc['prices']['USD']);
+                    $hourly_1 = util\Data::num($vc['prices']['USD']);
                     break;
                 case 'yrTerm3Hourly':
-                    $hourly_3 = ROOT_NS\util\Data::num($vc['prices']['USD']);
+                    $hourly_3 = util\Data::num($vc['prices']['USD']);
                     break;
             }
         }

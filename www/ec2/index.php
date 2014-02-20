@@ -5,13 +5,14 @@
  *
  * For column info and configurations, see config/*.json
  */
-namespace clifflu\aws_prices;
 
 /* http headers */
 header('Content-Type: application/json; charset=utf-8');
 
 /* path, autoloader, composer, etc... */
-require_once('../include/common.php');
+require_once('../../src/common.php');
+
+use clifflu\awsPrices\ec2;
 
 $parser = ec2\Parser::forge();
 $fetcher = ec2\Fetcher::forge();

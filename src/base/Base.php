@@ -1,6 +1,8 @@
 <?php
-namespace clifflu\aws_prices\base;
-use clifflu\aws_prices as ROOT_NS;
+
+namespace clifflu\awsPrices\base;
+
+use clifflu\awsPrices\util;
 
 abstract class Base extends Forge{
     // =============================
@@ -55,7 +57,7 @@ abstract class Base extends Forge{
         if (!file_exists($fn))
             return $cs;
 
-        if (ROOT_NS\util\Fs::file_age($fn) > $this->config['lock_patience_s'])
+        if (util\Fs::file_age($fn) > $this->config['lock_patience_s'])
             return $cs;
 
         return $cs | static::S_IN_PROGRESS;

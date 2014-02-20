@@ -1,13 +1,15 @@
 <?php
 
-namespace clifflu\aws_prices\ec2;
-use clifflu\aws_prices as ROOT_NS;
+namespace clifflu\awsPrices\ec2;
 
-class Fetcher extends ROOT_NS\base\Fetcher {
+use clifflu\awsPrices\base;
+use clifflu\awsPrices\util;
+
+class Fetcher extends base\Fetcher {
     use Common;
 
     public static function defaults($config = []) {
-        $_ = ROOT_NS\util\Config::get_one('fetch', static::get_domain());
+        $_ = util\Config::get_one('fetch', static::get_domain());
 
         if ($config)
             $_ = array_replace_recursive($_, $config);

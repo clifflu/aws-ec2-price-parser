@@ -1,7 +1,8 @@
 <?php
 
-namespace clifflu\aws_prices\base;
-use clifflu\aws_prices as ROOT_NS;
+namespace clifflu\awsPrices\base;
+
+use clifflu\awsPrices\util;
 
 /**
  * Parser
@@ -29,7 +30,7 @@ abstract class Parser extends Base {
     }
     
     public static function get_lock_fn() {
-        return ROOT_NS\util\Fs::fn_parser_lock(static::get_domain());
+        return util\Fs::fn_parser_lock(static::get_domain());
     }
 
     public function has_cache() {
@@ -38,7 +39,7 @@ abstract class Parser extends Base {
 
     public function is_cache_hot() {
         $fn = $this->get_cache_fn();
-        return ROOT_NS\util\Fs::file_age($fn) < $this->config['expire_hot_s'];
+        return util\Fs::file_age($fn) < $this->config['expire_hot_s'];
     }
 
     public function is_cache_valid() {
@@ -51,9 +52,9 @@ abstract class Parser extends Base {
         if ($this->is_cache_hot())
             return true;
 
-        $mtime = ROOT_NS\util\Fs::file_mtime($fn);
+        $mtime = util\Fs::file_mtime($fn);
         foreach($this->list_input_fn() as $fn) {
-            if (ROOT_NS\util\Fs::file_mtime($fn) > $mtime)
+            if (util\Fs::file_mtime($fn) > $mtime)
                 return false;
         }
 
@@ -98,7 +99,7 @@ abstract class Parser extends Base {
      * @return [type] [description]
      */
     protected function rebuild() {
-        $lock_fn = ROOT_NS\util\Fs::fn_parser_lock($this->get_domain());
+        $lock_fn = util\Fs::fn_parser_lock($this->get_domain());
         $sleep_us = $this->config['sleep_lock_s'] * 1000000;
 
         if (!$this->lock_acquire()) {
@@ -128,8 +129,8 @@ abstract class Parser extends Base {
         foreach($this->_fetchers as $f)
             $f->sync();
 
-        $output = ROOT_NS\util\Data::json_encode($this->_rebuild());
-        ROOT_NS\util\Fs::fdump($this->get_cache_fn(), $output);
+        $output = util\Data::json_encode($this->_rebuild());
+        util\Fs::fdump($this->get_cache_fn(), $output);
 
         $this->lock_release();
 
@@ -170,7 +171,7 @@ abstract class Parser extends Base {
     private $_lock_fp = null;
 
     protected function lock_acquire() {
-        $lock_fn = ROOT_NS\util\Fs::fn_parser_lock($this->get_domain());
+        $lock_fn = util\Fs::fn_parser_lock($this->get_domain());
         $this->_lock_fp = fopen($lock_fn, 'w');
         return flock($this->_lock_fp, LOCK_EX | LOCK_NB);
     }
@@ -186,7 +187,7 @@ abstract class Parser extends Base {
         if (!is_resource($this->_lock_fp))
             return;
 
-        $lock_fn = ROOT_NS\util\Fs::fn_parser_lock($this->get_domain());
+        $lock_fn = util\Fs::fn_parser_lock($this->get_domain());
 
         flock($this->_lock_fp, LOCK_UN);
         fclose($this->_lock_fp);

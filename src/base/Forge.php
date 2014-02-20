@@ -1,6 +1,5 @@
 <?php
-namespace clifflu\aws_prices\base;
-use clifflu\aws_prices as ROOT_NS;
+namespace clifflu\awsPrices\base;
 
 /**
  * class Base_Factry
@@ -29,6 +28,4 @@ abstract class Forge{
 
         return (array) $overrides;
     }
-
-
 }

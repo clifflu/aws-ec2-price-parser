@@ -1,7 +1,6 @@
 <?php
 
-namespace clifflu\aws_prices\util;
-use clifflu\aws_prices as ROOT_NS;
+namespace clifflu\awsPrices\util;
 
 class Data {
     

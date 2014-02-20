@@ -4,7 +4,7 @@
  * 
  */
 
-namespace clifflu\aws_prices;
+namespace clifflu\awsPrices;
 
 // ========================
 // Paths
